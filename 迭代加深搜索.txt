@@ -1,0 +1,90 @@
+// 迭代加深算法, 当回溯法无法确定深度时候,用迭代加深
+//
+
+
+#include <iostream>
+#include <algorithm>
+using namespace std;
+int maxed = 1;
+int vas[10000];
+int v[10000];
+
+int get_first(int a, int b)
+{
+	for (int c = 1;; c++)
+		if (b <= a * c)
+			return c;
+}
+
+int gcd(int a2, int b2)
+{
+	return b2 == 0 ? a2 : gcd(b2, a2%b2);
+}
+
+bool better(int d)
+{
+	for (int i = d; d >= 0; i--)
+		if (v[i] != vas[i])
+		{
+			return vas[i] == -1 || v[i] < vas[i];
+		}
+	return false;
+}
+
+bool dfs(int d, int from, int aa, int bb)
+{
+	if (d == maxed)
+	{
+		if (bb%aa) return false;
+		v[d] = bb / aa;
+		if (better(d)) memcpy(vas, v, sizeof(int) * d);
+		return true;
+	}
+	bool ok = false;
+	from = max(from, get_first(aa, bb));
+
+	for (int i = from; ; i++)
+	{
+		if (bb*(maxed + 1 - d) <= i * aa) break;
+		v[d] = i;
+		int b2 = bb * i;
+		int a2 = aa * i - bb;
+		int g = gcd(a2, b2);
+		if (dfs(d + 1, i + 1, a2 / g, b2 / g)) ok = true;
+	}
+	return ok;
+}
+int main()
+{
+	int a, b;
+	int Case = 1;
+	while (cin >> a >> b)
+	{
+		int ok = 0;
+		for (maxed = 1; ; maxed++)
+		{
+			memset(vas, -1, sizeof(vas));
+			if (dfs(0, get_first(a, b), a, b))
+			{
+				ok = 1;
+				break;
+			}
+		}
+		if (ok)
+		{
+			cout << "Case " << Case++ << ": " << a << "/" << b << "=";
+			for (int i = 0; i < maxed ; i++)
+				cout << "1/" << vas[i] << "+";
+			cout << "1/" << vas[maxed - 1];
+			cout << endl;
+		}
+		else
+		{
+			cout << "Case " << Case++ << ":" << endl;
+
+		}
+
+	}
+	return 0;
+}
+
